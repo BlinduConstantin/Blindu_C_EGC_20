@@ -2,7 +2,12 @@ using OpenTK.Mathematics;
 
 namespace Egc;
 
-/// <summary>Un obiect din scenă: o formă (Mesh), transformarea ei (Transform2D) și o nuanță.</summary>
+/// <summary>Un obiect din scenă: o formă (Mesh), transformarea ei (
+/// 
+/// 
+/// 
+/// 
+/// ) și o nuanță.</summary>
 public sealed class SceneObject : IDisposable
 {
     public string Name { get; }

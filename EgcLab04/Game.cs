@@ -64,7 +64,7 @@ public class Game : GameWindow
         AddObject("pătrat", Shapes.Quad(),
                   new Transform2D { Position = new Vector2(-1.8f, -1.0f), Depth = -3.0f });
         AddObject("triunghi", Shapes.Triangle(),
-                  new Transform2D { Position = new Vector2(-1.2f, 1.0f) });
+                  new Transform2D { Position = new Vector2(-1.2f, 1.0f), Rotation=45,Scale=new Vector2(1.5f,0.5f)}); ////////TEMPORAR
         AddObject("hexagon", Shapes.RegularPolygon(6, 0.5f),
                   new Transform2D { Position = new Vector2(2.0f, 1.0f) });
         AddObject("cerc", Shapes.RegularPolygon(64, 0.5f),
@@ -101,6 +101,10 @@ public class Game : GameWindow
 
         float dt = (float)args.Time;
         SceneObject sel = _scene[_selected];
+        if (KeyboardState.IsKeyDown(Keys.LeftShift))
+        {
+            dt = dt * 3;
+        }
 
         const float moveSpeed = 2.0f;   // unități de lume pe secundă
         if (KeyboardState.IsKeyDown(Keys.Left))  sel.Transform.Position.X -= moveSpeed * dt;
@@ -108,14 +112,51 @@ public class Game : GameWindow
         if (KeyboardState.IsKeyDown(Keys.Down))  sel.Transform.Position.Y -= moveSpeed * dt;
         if (KeyboardState.IsKeyDown(Keys.Up))    sel.Transform.Position.Y += moveSpeed * dt;
 
-        // TODO (T2): Q / E rotesc obiectul, Z / X îl scalează
+        // TODO (T2): Q / E rotesc obiectul, Z / X îl scalează (DONE)
 
         if (KeyboardState.IsKeyPressed(Keys.Tab)) _selected = (_selected + 1) % _scene.Count;
         if (KeyboardState.IsKeyPressed(Keys.O))   _camera.IsPerspective = !_camera.IsPerspective;
         if (KeyboardState.IsKeyPressed(Keys.F))   _wireframe = !_wireframe;
         if (KeyboardState.IsKeyPressed(Keys.R))   ResetScene();
 
-        if (KeyboardState.IsKeyPressed(Keys.Tab) || KeyboardState.IsKeyPressed(Keys.O) ||
+        ///T2 : Shift, Rotatie Q / E, Scalare.
+        ///Scalarea se face prin inmultire deoarece, prin adunare, se poate ajunge la valori negative, ceea ce duce la oglindirea obiectului
+        ///Prin inmultire/ impartire, se pot ajunge la valori apropiate de 0.
+        if (KeyboardState.IsKeyDown(Keys.Q))
+        {
+            sel.Transform.Rotation = sel.Transform.Rotation - 90 * dt;
+        }
+        if (KeyboardState.IsKeyDown(Keys.E))
+        {
+            sel.Transform.Rotation = sel.Transform.Rotation + 90 * dt;
+        }
+
+        if (KeyboardState.IsKeyDown(Keys.Z))
+        {
+            sel.Transform.Scale = sel.Transform.Scale / (float)Math.Pow(1.5, dt);
+            if (sel.Transform.Scale.X <0.1f || sel.Transform.Scale.Y < 0.1f)
+            {
+                sel.Transform.Scale.X = 0.1f;
+                sel.Transform.Scale.Y = 0.1f;
+            }
+        }
+
+        if (KeyboardState.IsKeyDown(Keys.X))
+        {
+            sel.Transform.Scale = sel.Transform.Scale * (float)Math.Pow(1.5, dt);
+            if (sel.Transform.Scale.X >10 || sel.Transform.Scale.Y >10)
+            {
+                sel.Transform.Scale.X = 10;
+                sel.Transform.Scale.Y = 10;
+            }
+        }
+        
+
+
+        
+
+
+            if (KeyboardState.IsKeyPressed(Keys.Tab) || KeyboardState.IsKeyPressed(Keys.O) ||
             KeyboardState.IsKeyPressed(Keys.R))
         {
             _titleDirty = true;
@@ -125,6 +166,8 @@ public class Game : GameWindow
 
         // TODO (T3): la clic stânga, obiectul selectat se mută în punctul din lume aflat sub cursor
         //            (folosiți ScreenToWorld; Depth nu se schimbă)
+
+
 
         // TODO (T4, facultativ): clic dreapta = pivot; tasta P ținută = rotație în jurul pivotului
 
@@ -206,6 +249,16 @@ public class Game : GameWindow
     private Vector2 ScreenToWorld(Vector2 mousePixels)
     {
         // TODO (T3): pasul 1 (pixel → NDC), apoi pasul 2 (NDC → lume, cu inversa lui view * projection)
+        ///NOT FINISHED. Nu am inteles cum ar trebui sa fac in totalitate conversia.
+        float x_ndc = 2 * mousePixels.X / ClientSize.X - 1;
+        float y_ndc = 1 - 2 * mousePixels.Y / ClientSize.Y;
+        ///La formula este 1- deoarece pentru mouse, y creste in jos, deci axa y trebuie intoarsa
+        Matrix4 mat = Matrix4.Invert(_camera.ProjectionMatrix * _camera.ViewMatrix);
+         
+        Vector4 p2 = new Vector4(x_ndc, y_ndc, 0, 1) * mat;
+
+
+
         return Vector2.Zero;
     }
 
